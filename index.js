@@ -46,10 +46,10 @@ app.get('/hello/:id?', (req, res) => {
 
 //step-5 basics of crud 
   const movies = [
-    { title: 'Jaws', year: 1975, rating: 8 },
-    { title: 'Avatar', year: 2009, rating: 7.8 },
-    { title: 'Brazil', year: 1985, rating: 8 },
-    { title: 'الإرهاب والكباب‎', year: 1992, rating: 6.2 }
+    { id:1, title: 'Jaws', year: 1975, rating: 8 },
+    {id:2, title: 'Avatar', year: 2009, rating: 7.8 },
+    { id:3,title: 'Brazil', year: 1985, rating: 8 },
+    { id:4,title: 'الإرهاب والكباب‎', year: 1992, rating: 6.2 }
 ]
   // Read
 app.get('/movies/read', (req, res) => {
@@ -91,6 +91,20 @@ app.get('/movies/read/by-title', (req, res) => {
     const moviesByTitle = movies.slice().sort((a, b) => a.title.localeCompare(b.title)); // .localeCompare(), the sorting is done in a way that ignores case and follows alphabetical order correctly, regardless of accents.
     res.status(200).json({ status: 200, data: moviesByTitle });
   });
+
+
+//step-7-read one
+app.get('/movies/read/id/:id', (req, res) => {
+  const { id } = req.params;
+  const movie = movies.find((item) => item.id === parseInt(id));
+  
+  if (movie) {
+    res.status(200).json({ status: 200, data: movie });
+  } else {
+    res.status(404).json({ status: 404, error: true, message: `The movie ${id} does not exist` });
+  }
+});
+
 
 // Start the server and listen on the defined port
 app.listen(PORT, () => {
