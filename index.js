@@ -41,6 +41,31 @@ app.get('/hello/:id?', (req, res) => {
     }
   });
 
+  //step-5 basics of crud 
+  const movies = [
+    { title: 'Jaws', year: 1975, rating: 8 },
+    { title: 'Avatar', year: 2009, rating: 7.8 },
+    { title: 'Brazil', year: 1985, rating: 8 },
+    { title: 'الإرهاب والكباب‎', year: 1992, rating: 6.2 }
+]
+// Read
+app.get('/movies/read', (req, res) => {
+    res.status(200).json({ status: 200, data: movies });
+  });
+  //create
+  app.get('/movies/create', (req, res) => {
+    res.status(200).json({ status: 200, message: 'Create movie route' });
+  });
+
+//update
+app.get('/movies/update', (req, res) => {
+    res.json({ status: 200, message: 'This is to update route' });
+  });
+  
+  // delete
+  app.get('/movies/delete', (req, res) => {
+    res.json({ status: 200, message: 'This is to delete route' });
+  });
 
 // Start the server and listen on the defined port
 app.listen(PORT, () => {
