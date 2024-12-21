@@ -188,6 +188,33 @@ app.delete('/movies/delete/:id', (req, res) => {
 });
 
 
+//step-10-update
+app.put('/movies/update/:id', (req,res)=>{
+  const{id}=req.params
+  const { title, year, rating } = req.body;
+
+  // Find the movie with the specified ID
+  const movieToUpdate = movies.find((movie) => movie.id === parseInt(id));
+
+  if (!movieToUpdate) {
+    return res.status(404).json({ status: 404, error: true, message: `the movie ${id} does not exist` });
+  }
+
+  
+  if (title !== undefined) {
+    movieToUpdate.title = title;
+  }
+  if (year !== undefined) {
+    movieToUpdate.year = parseInt(year);
+  }
+  if (rating !== undefined) {
+    movieToUpdate.rating = parseFloat(rating);
+  }
+
+  res.status(200).json({ status: 200, data: movieToUpdate });
+});
+
+
 // Start the server and listen on the defined port
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
