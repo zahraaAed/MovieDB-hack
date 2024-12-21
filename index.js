@@ -6,6 +6,7 @@ app.get('/', (req, res) => {
     res.send('ok')
   });
 
+  //step-3- Create an express simple API
 
 app.get('/test', (req,res)=>{
     res.json({ status: 200, message: "ok" });
@@ -22,6 +23,8 @@ app.get('/time', (req,res)=>{
 
 
 });
+
+//Step 4 - Let's complicate the API
 
 app.get('/hello/:id?', (req, res) => {
     const { id } = req.params;
@@ -41,14 +44,14 @@ app.get('/hello/:id?', (req, res) => {
     }
   });
 
-  //step-5 basics of crud 
+//step-5 basics of crud 
   const movies = [
     { title: 'Jaws', year: 1975, rating: 8 },
     { title: 'Avatar', year: 2009, rating: 7.8 },
     { title: 'Brazil', year: 1985, rating: 8 },
     { title: 'الإرهاب والكباب‎', year: 1992, rating: 6.2 }
 ]
-// Read
+  // Read
 app.get('/movies/read', (req, res) => {
     res.status(200).json({ status: 200, data: movies });
   });
@@ -57,7 +60,7 @@ app.get('/movies/read', (req, res) => {
     res.status(200).json({ status: 200, message: 'Create movie route' });
   });
 
-//update
+  //update
 app.get('/movies/update', (req, res) => {
     res.json({ status: 200, message: 'This is to update route' });
   });
@@ -65,6 +68,28 @@ app.get('/movies/update', (req, res) => {
   // delete
   app.get('/movies/delete', (req, res) => {
     res.json({ status: 200, message: 'This is to delete route' });
+  });
+
+
+//step-6-search
+
+  //  movies ordered by date
+app.get('/movies/read/by-date', (req, res) => {
+    const moviesByDate = movies.slice().sort((a, b) => a.year - b.year); //we use slice to make copy of the original array beore sorting them
+    res.status(200).json({ status: 200, data: moviesByDate });
+  });
+
+  
+ //  movies ordered by rating
+ app.get('/movies/read/by-rating', (req, res) => {
+    const moviesByRate = movies.slice().sort((a, b) => b.rating - a.rating);
+    res.status(200).json({ status: 200, data: moviesByRate });
+  });
+
+  //  movies ordered by title
+app.get('/movies/read/by-title', (req, res) => {
+    const moviesByTitle = movies.slice().sort((a, b) => a.title.localeCompare(b.title)); // .localeCompare(), the sorting is done in a way that ignores case and follows alphabetical order correctly, regardless of accents.
+    res.status(200).json({ status: 200, data: moviesByTitle });
   });
 
 // Start the server and listen on the defined port
