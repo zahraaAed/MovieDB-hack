@@ -2,11 +2,14 @@ const express=require("express");
 const app=express();
 const PORT=3000;
 
+// added to handle JSON data in POST requests
+app.use(express.json());  
+
 app.get('/', (req, res) => {
     res.send('ok')
   });
 
-  //step-3- Create an express simple API
+//step-3- Create an express simple API
 
 app.get('/test', (req,res)=>{
     res.json({ status: 200, message: "ok" });
@@ -51,21 +54,21 @@ app.get('/hello/:id?', (req, res) => {
     { id:3,title: 'Brazil', year: 1985, rating: 8 },
     { id:4,title: 'الإرهاب والكباب‎', year: 1992, rating: 6.2 }
 ]
-  // Read
+    // Read
 app.get('/movies/read', (req, res) => {
     res.status(200).json({ status: 200, data: movies });
   });
-  //create
+    //create
   app.get('/movies/create', (req, res) => {
     res.status(200).json({ status: 200, message: 'Create movie route' });
   });
 
-  //update
+    //update
 app.get('/movies/update', (req, res) => {
     res.json({ status: 200, message: 'This is to update route' });
   });
   
-  // delete
+    // delete
   app.get('/movies/delete', (req, res) => {
     res.json({ status: 200, message: 'This is to delete route' });
   });
@@ -73,14 +76,14 @@ app.get('/movies/update', (req, res) => {
 
 //step-6-search
 
-  //  movies ordered by date
+    //  movies ordered by date
 app.get('/movies/read/by-date', (req, res) => {
     const moviesByDate = movies.slice().sort((a, b) => a.year - b.year); //we use slice to make copy of the original array beore sorting them
     res.status(200).json({ status: 200, data: moviesByDate });
   });
 
   
- //  movies ordered by rating
+   //  movies ordered by rating
  app.get('/movies/read/by-rating', (req, res) => {
     const moviesByRate = movies.slice().sort((a, b) => b.rating - a.rating);
     res.status(200).json({ status: 200, data: moviesByRate });
@@ -103,6 +106,40 @@ app.get('/movies/read/id/:id', (req, res) => {
   } else {
     res.status(404).json({ status: 404, error: true, message: `The movie ${id} does not exist` });
   }
+});
+
+
+//step-8-create
+app.post('/movies/add', (req, res) => {
+  const { title, year, rating } = req.body;
+
+  // Check if title and year are provided
+  if (!title || !year) {
+    res.status(403).json({ status: 403, error: true, message: 'you cannot create a movie without providing a title and a year' });
+    return;
+  }
+// Check if year/rating is a 4-digit number
+const parsedYear = parseInt(year);
+if (isNaN(parsedYear) || parsedYear < 1000 || parsedYear > 9999) {
+  res.status(403).json({ status: 403, error: true, message: 'you cannot create a movie without providing a valid 4-digit year' });
+  return;
+}
+
+
+  const parsedRating = rating || 4;
+
+  const newMovie = {
+    id: movies.length + 1,
+    title,
+    year: parseInt(year),
+    rating: parseFloat(parsedRating)
+  };
+
+  //add the new movie to the array
+  movies.push(newMovie);
+
+  // Respond with the updated list of movies
+  res.status(200).json({ status: 200, data: movies });
 });
 
 
