@@ -1,6 +1,9 @@
+require('dotenv').config()
 const express = require("express");
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 4000;
+const mongoose=require('mongoose')
+
 
 // added to handle JSON data in POST requests
 app.use(express.json());
@@ -202,7 +205,19 @@ app.put('/movies/update/:id', (req,res)=>{
 });
 
 
+//connect to mongoose
+mongoose.connect(process.env.MONGO_URL)
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`DB connected and Server is running on ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.log("Error connecting to the database:", err);
+  });
+
+
 // Start the server and listen on the defined port
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+//app.listen(process.env.PORT, () => {
+  //console.log(`Server is running on http://localhost:${PORT}`);
+//});
