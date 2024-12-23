@@ -1,7 +1,8 @@
 require('dotenv').config()
 const express = require("express");
+const verifyToken = require('./VerifyToken.ks');
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = 3000;
 const mongoose=require('mongoose')
 
 
@@ -11,6 +12,14 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.send("ok");
 });
+
+
+//adding user
+const users=[
+  { id:1,username:"zahraa", password:"1234"},
+  {id:2, username:"rasha",password:"4321"}
+];
+
 
 //step-3- Create an express simple API
 
@@ -42,10 +51,9 @@ app.get("/hello/:id?", (req, res) => {
 app.get("/search", (req, res) => {
   const { s } = req.query;
   if (s) {
-    res.status(200).json({ status: 200, message: "ok", data: s });
+    res.json({ status: 200, message: "ok", data: s });
   } else {
     res
-      .status(500)
       .json({
         status: 500,
         error: true,
@@ -53,6 +61,7 @@ app.get("/search", (req, res) => {
       });
   }
 });
+
 
 //step-5 basics of crud
 const movies = [
@@ -62,8 +71,8 @@ const movies = [
   { id: 4, title: "الإرهاب والكباب‎", year: 1992, rating: 6.2 },
 ];
 // Read
-app.get("/movies/", (req, res) => {
-  res.status(200).json({ status: 200, data: movies });
+app.get("/movies", (req, res) => {
+  res.json({ status: 200, data: movies });
 });
 
 
@@ -72,13 +81,13 @@ app.get("/movies/", (req, res) => {
 //  movies ordered by date
 app.get("/movies/read/by-date", (req, res) => {
   const moviesByDate = movies.slice().sort((a, b) => a.year - b.year); //we use slice to make copy of the original array beore sorting them
-  res.status(200).json({ status: 200, data: moviesByDate });
+  res.json({ status: 200, data: moviesByDate });
 });
 
 //  movies ordered by rating
 app.get("/movies/read/by-rating", (req, res) => {
   const moviesByRate = movies.slice().sort((a, b) => b.rating - a.rating);
-  res.status(200).json({ status: 200, data: moviesByRate });
+  res.json({ status: 200, data: moviesByRate });
 });
 
 //  movies ordered by title
@@ -86,7 +95,7 @@ app.get("/movies/read/by-title", (req, res) => {
   const moviesByTitle = movies
     .slice()
     .sort((a, b) => a.title.localeCompare(b.title)); // .localeCompare(), the sorting is done in a way that ignores case and follows alphabetical order correctly, regardless of accents.
-  res.status(200).json({ status: 200, data: moviesByTitle });
+  res.json({ status: 200, data: moviesByTitle });
 });
 
 //step-7-read one
@@ -95,10 +104,9 @@ app.get("/movies/read/id/:id", (req, res) => {
   const movie = movies.find((item) => item.id === parseInt(id));
 
   if (movie) {
-    res.status(200).json({ status: 200, data: movie });
+    res.json({ status: 200, data: movie });
   } else {
     res
-      .status(404)
       .json({
         status: 404,
         error: true,
@@ -114,9 +122,9 @@ app.post("/movies/add", (req, res) => {
   // Check if title and year are provided
   if (!title || !year) {
     res
-      .status(403)
+    
       .json({
-        status: 403,
+        status: 404,
         error: true,
         message:
           "you cannot create a movie without providing a title and a year",
@@ -127,9 +135,9 @@ app.post("/movies/add", (req, res) => {
   const parsedYear = parseInt(year);
   if (isNaN(parsedYear) || parsedYear < 1000 || parsedYear > 9999) {
     res
-      .status(403)
+    
       .json({
-        status: 403,
+        status: 404,
         error: true,
         message:
           "you cannot create a movie without providing a valid 4-digit year",
@@ -150,19 +158,25 @@ app.post("/movies/add", (req, res) => {
   movies.push(newMovie);
 
   // Respond with the updated list of movies
-  res.status(200).json({ status: 200, data: movies });
+  res.json({ status: 200, data: movies });
 });
 
 
 //step-9-delete
 app.delete('/movies/delete/:id', (req, res) => {
   const { id } = req.params;
+  const {username,password}=req.query;
+  console.log(username);
+
+  if(!username || !password){
+    console.log("user is not deifined")
+  }
 
   // Find the movie with the specified ID
   const movieToDelete = movies.find((movie) => movie.id === parseInt(id));
 
   if (!movieToDelete) {
-    res.status(404).json({ status: 404, error: true, message: `the movie ${id} does not exist` });
+    res.json({ status: 404, error: true, message: `the movie ${id} does not exist` });
     return;
   }
 
@@ -174,7 +188,7 @@ app.delete('/movies/delete/:id', (req, res) => {
   movies.push(...updatedMovies);  ///adds all the elements from updatedMovies back into the movies array.
 
   // Respond with the updated list of movies
-  res.status(200).json({ status: 200, data: movies });
+  res.json({ status: 200, data: movies });
 });
 
 
@@ -187,7 +201,7 @@ app.put('/movies/update/:id', (req,res)=>{
   const movieToUpdate = movies.find((movie) => movie.id === parseInt(id));
 
   if (!movieToUpdate) {
-    return res.status(404).json({ status: 404, error: true, message: `the movie ${id} does not exist` });
+    return res.json({ status: 404, error: true, message: `the movie ${id} does not exist` });
   }
 
   
@@ -201,7 +215,76 @@ app.put('/movies/update/:id', (req,res)=>{
     movieToUpdate.rating = parseFloat(rating);
   }
 
-  res.status(200).json({ status: 200, data: movieToUpdate });
+  res.json({ status: 200, data: movieToUpdate });
+});
+
+
+//step 13: Authentication
+
+//get all users
+app.get("/users", (req,res)=>{
+    res.json({ status: 200, data: users });
+  });
+
+//add users
+app.post("/user/add", (req, res) => {
+  const { id,username, password } = req.body;
+
+     // Check if the username already exists in the array
+  const checkForUser = users.find((user) => user.username === username);
+  if (checkForUser) {
+    return res.status(404).json({ status: 404, message: "User already exists" });
+  }
+
+     // Add the new user to the array
+  users.push({ id,username, password });
+  res.json({ status: 200, message: "User created successfully.", data: users });
+});
+
+//delete user
+app.delete("/user/delete/:id", (req,res)=>{
+  const { id } = req.params;
+  const userToDelete = users.find((user) => user.id === parseInt(id));
+
+  if (!userToDelete) {
+    res.json({ status: 404, error: true, message: `the user with id ${id} does not exist` });
+    return;
+  }
+
+  const updatedUsers = users.filter((user) => user.id !== parseInt(id));
+
+
+  // Update 
+  users.length = 0; //clears the original array
+  users.push(...updatedUsers);  ///adds all the elements from updatedUsers back into the movies array.
+
+  // Respond with the updated list of movies
+  res.json({ status: 200, data:users });
+});
+
+
+//update user
+app.patch("/user/update/:id",(req,res)=>{
+  const { id } = req.params;
+  const { username, password} = req.body;
+
+  // Find the user with the specified ID
+  const userToUpdate = users.find((user) => user.id === parseInt(id));
+
+  if (!userToUpdate) {
+    return res.json({ status: 404, error: true, message: `the user with id ${id} does not exist` });
+  }
+
+  
+  if (username!== undefined ) {
+    userToUpdate.username=username
+  }
+  if (password !== undefined) {
+    userToUpdate.password = parseInt(password);
+  }
+
+
+  res.json({ status: 200, data: userToUpdate });
 });
 
 
@@ -209,15 +292,10 @@ app.put('/movies/update/:id', (req,res)=>{
 mongoose.connect(process.env.MONGO_URL)
   .then(() => {
     app.listen(PORT, () => {
-      console.log(`DB connected and Server is running on ${PORT}`);
+      console.log(`DB connected and Server is running on http://localhost:${PORT}`);
     });
   })
   .catch((err) => {
     console.log("Error connecting to the database:", err);
   });
 
-
-// Start the server and listen on the defined port
-//app.listen(process.env.PORT, () => {
-  //console.log(`Server is running on http://localhost:${PORT}`);
-//});
